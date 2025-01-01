@@ -1,0 +1,18 @@
+
+[Unit]
+Description=Telegram Command Distribution System
+After=network.target
+
+[Service]
+Type=simple
+User=%i
+Group=%i
+WorkingDirectory=%PROJECT_DIR%
+Environment=NODE_ENV=production
+EnvironmentFile=%PROJECT_DIR%/.env
+ExecStart=/usr/bin/node %PROJECT_DIR%/dist/server.js
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

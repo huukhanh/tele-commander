@@ -155,6 +155,83 @@ Result for command /test:
 Command executed successfully
 ```
 
+## Running as System Service
+
+The application can be configured to run automatically on system boot using systemd.
+
+### Prerequisites
+- Linux system with systemd
+- Root/sudo access
+- Node.js installed system-wide
+
+### Installation Steps
+
+1. Configure environment:
+```bash
+# Copy environment template
+cp .env.example .env
+
+# Edit environment file with your settings
+nano .env
+```
+
+2. Build the application:
+```bash
+npm install
+npm run build
+```
+
+3. Install systemd service:
+```bash
+# For current user
+sudo ./systemd/install.sh
+
+# For specific user
+sudo ./systemd/install.sh username
+```
+
+4. Start and enable the service:
+```bash
+# Replace 'username' with your username
+sudo systemctl start tele-commander@username.service
+sudo systemctl enable tele-commander@username.service
+```
+
+### Service Management
+
+Common systemd commands:
+```bash
+# Check service status
+sudo systemctl status tele-commander@username.service
+
+# View logs
+sudo journalctl -u tele-commander@username.service -f
+
+# Restart service
+sudo systemctl restart tele-commander@username.service
+
+# Stop service
+sudo systemctl stop tele-commander@username.service
+
+# Disable autostart
+sudo systemctl disable tele-commander@username.service
+```
+
+### Updating the Application
+
+When updating the application:
+```bash
+# Pull latest changes
+git pull
+
+# Install dependencies and rebuild
+npm install
+npm run build
+
+# Restart the service
+sudo systemctl restart tele-commander@username.service
+```
+
 ## Development
 
 ### Project Structure
