@@ -4,10 +4,12 @@ A Telegram bot-based command distribution system that allows multiple programs t
 
 ## Features
 
-- Receive commands from Telegram
+- Receive and process commands from Telegram
 - Distribute commands to different programs based on command prefixes
+- Filter and retrieve commands by status and prefix
+- Pagination support for command listing
 - Handle command results and send them back to Telegram
-- RESTful API for command retrieval and result submission
+- RESTful API for command management
 
 ## Prerequisites
 
@@ -40,14 +42,38 @@ npm run build
 npm start
 ```
 
-For development, you can use:
+For development:
 ```bash
 npm run dev
 ```
 
 ## API Endpoints
 
-### Get Commands
+### List Commands with Filters
+```
+GET /api/commands
+```
+Retrieve commands with optional filtering and pagination.
+
+Query Parameters:
+- `status`: Filter by command status (pending/processing/completed/failed)
+- `prefix`: Filter by command prefix
+- `limit`: Number of items per page (default: 10)
+- `offset`: Page offset for pagination (default: 0)
+
+Example:
+```bash
+# Get all pending commands
+curl http://localhost:3000/api/commands?status=pending
+
+# Get completed commands with prefix '/test'
+curl http://localhost:3000/api/commands?status=completed&prefix=/test
+
+# Get paginated results
+curl http://localhost:3000/api/commands?limit=5&offset=10
+```
+
+### Get Pending Commands by Prefix
 ```
 GET /api/commands/:prefix
 ```
@@ -58,51 +84,86 @@ Example:
 curl http://localhost:3000/api/commands/test
 ```
 
-### Submit Results
+### Submit Command Results
 ```
 POST /api/results
 ```
-Submit command results back to the system.
+Submit command execution results back to the system.
+
+Request Body:
+```json
+{
+  "commandId": "string",
+  "result": "string",
+  "status": "success" | "error"
+}
+```
 
 Example:
 ```bash
 curl -X POST http://localhost:3000/api/results \
   -H "Content-Type: application/json" \
-  -d '{"commandId":"command-uuid","result":"Task completed","status":"success"}'
+  -d '{
+    "commandId": "123e4567-e89b-12d3-a456-426614174000",
+    "result": "Task completed successfully",
+    "status": "success"
+  }'
 ```
 
 ## Usage Example
 
-1. Send a command in Telegram:
+### 1. Command Submission
+Send a command in Telegram:
 ```
 /test hello world
 ```
 
-2. The bot will respond with a command ID:
+Bot response:
 ```
 Command received. ID: 123e4567-e89b-12d3-a456-426614174000
 ```
 
-3. Your program can fetch pending commands:
+### 2. Command Retrieval
+Your program can fetch commands using any of these methods:
+
 ```bash
+# Get all pending commands
+curl http://localhost:3000/api/commands?status=pending
+
+# Get specific prefix commands
 curl http://localhost:3000/api/commands/test
+
+# Get filtered and paginated commands
+curl http://localhost:3000/api/commands?status=pending&prefix=/test&limit=5
 ```
 
-4. Process the command and send back results:
+### 3. Result Submission
+Process the command and send back results:
 ```bash
 curl -X POST http://localhost:3000/api/results \
   -H "Content-Type: application/json" \
   -d '{
-    "commandId":"123e4567-e89b-12d3-a456-426614174000",
-    "result":"Hello World command executed successfully",
-    "status":"success"
+    "commandId": "123e4567-e89b-12d3-a456-426614174000",
+    "result": "Command executed successfully",
+    "status": "success"
   }'
 ```
 
-5. The bot will send the result back to the Telegram chat:
+The bot will send the result back to the Telegram chat:
 ```
 Result for command /test:
-Hello World command executed successfully
+Command executed successfully
+```
+
+## Development
+
+### Project Structure
+```
+src/
+  ├── config.ts       # Configuration settings
+  ├── types.ts        # TypeScript interfaces
+  ├── commandStore.ts # Command storage and management
+  └── server.ts       # Main server implementation
 ```
 
 ## License

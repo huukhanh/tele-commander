@@ -3,7 +3,7 @@ import TelegramBot from 'node-telegram-bot-api';
 import { v4 as uuidv4 } from 'uuid';
 import { config } from './config';
 import { commandStore } from './commandStore';
-import { Command, CommandResult } from './types';
+import { Command, CommandResult, CommandQueryParams, CommandListResponse } from './types';
 
 const app = express();
 const bot = new TelegramBot(config.telegramToken, { polling: true });
@@ -33,6 +33,19 @@ app.get('/api/commands/:prefix', (req, res) => {
     const prefix = config.commandPrefix + req.params.prefix;
     const commands = commandStore.getPendingCommands(prefix);
     res.json(commands);
+});
+
+// New API endpoint to list commands with filters
+app.get('/api/commands', (req, res) => {
+    const queryParams: CommandQueryParams = {
+        status: req.query.status as Command['status'],
+        prefix: req.query.prefix as string,
+        limit: req.query.limit ? parseInt(req.query.limit as string) : undefined,
+        offset: req.query.offset ? parseInt(req.query.offset as string) : undefined
+    };
+
+    const result: CommandListResponse = commandStore.getFilteredCommands(queryParams);
+    res.json(result);
 });
 
 // API endpoint to submit command results

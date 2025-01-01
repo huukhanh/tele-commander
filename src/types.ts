@@ -8,7 +8,19 @@ export interface Command {
 }
 
 export interface CommandResult {
-    commandId: string;
-    result: string;
+    commandId: string;    // Changed from 'id'
+    result: string;       // Added this field
     status: 'success' | 'error';
+}
+
+export interface CommandQueryParams {
+    status?: Command['status'];
+    prefix?: string;
+    limit?: number;
+    offset?: number;
+}
+
+export interface CommandListResponse {
+    total: number;
+    commands: Command[];
 }

@@ -1,4 +1,4 @@
-import { Command } from './types';
+import { Command, CommandQueryParams, CommandListResponse } from './types';
 
 class CommandStore {
     private commands: Map<string, Command> = new Map();
@@ -22,6 +22,32 @@ class CommandStore {
             command.status = status;
             this.commands.set(id, command);
         }
+    }
+
+    getFilteredCommands(params: CommandQueryParams): CommandListResponse {
+        let filteredCommands = Array.from(this.commands.values());
+
+        if (params.status) {
+            filteredCommands = filteredCommands.filter(cmd => cmd.status === params.status);
+        }
+
+        if (params.prefix && params.prefix.length > 0) {
+            filteredCommands = filteredCommands.filter(cmd => cmd.command.startsWith(params.prefix!));
+        }
+
+        const total = filteredCommands.length;
+
+        // Apply pagination
+        if (params.offset || params.limit) {
+            const offset = params.offset || 0;
+            const limit = params.limit || 10;
+            filteredCommands = filteredCommands.slice(offset, offset + limit);
+        }
+
+        return {
+            commands: filteredCommands,
+            total
+        };
     }
 }
 
